@@ -38,4 +38,8 @@ void display_all_rooms(const RoomArray* ra);
 
 void display_room_detail(const Room* room);
 
+/* Filter ruangan berdasarkan fasilitas */
+int filter_rooms_by_facility(const RoomArray* ra,
+                             const char* facility);
+
 #endif

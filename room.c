@@ -1,5 +1,6 @@
 
 #include "room.h"
+#include <ctype.h>
 
 /* Inisialisasi Array ruangan */
 void init_room_array(RoomArray* ra) {
@@ -113,4 +114,62 @@ void display_room_detail(const Room* room) {
     print_schedules(room->schedule_head);
 
     printf("===============================\n");
+}
+/* Membantu pencarian fasilitas tanpa membedakan huruf besar/kecil */
+static int contains_ignore_case(const char* text, const char* keyword) {
+    if (text == NULL || keyword == NULL) {
+        return 0;
+    }
+
+    if (*keyword == '\0') {
+        return 1;
+    }
+
+    while (*text != '\0') {
+        const char* t = text;
+        const char* k = keyword;
+
+        while (*t != '\0' && *k != '\0' &&
+               tolower((unsigned char)*t) ==
+               tolower((unsigned char)*k)) {
+            t++;
+            k++;
+        }
+
+        if (*k == '\0') {
+            return 1;
+        }
+
+        text++;
+    }
+
+    return 0;
+}
+/* Filter ruangan berdasarkan fasilitas */
+int filter_rooms_by_facility(const RoomArray* ra,
+                             const char* facility) {
+    if (ra == NULL || facility == NULL || facility[0] == '\0') {
+        printf("[Error] Parameter filter tidak valid!\n");
+        return 0;
+    }
+
+    int ditemukan = 0;
+
+    printf("\n=== HASIL FILTER FASILITAS: %s ===\n", facility);
+
+    for (int i = 0; i < ra->count; i++) {
+        if (contains_ignore_case(ra->rooms[i].facilities, facility)) {
+            display_room_detail(&ra->rooms[i]);
+            ditemukan++;
+        }
+    }
+
+    if (ditemukan == 0) {
+        printf("[Info] Tidak ada ruangan dengan fasilitas '%s'.\n",
+               facility);
+    }
+
+    printf("\nJumlah ruangan ditemukan: %d\n", ditemukan);
+
+    return ditemukan;
 }
