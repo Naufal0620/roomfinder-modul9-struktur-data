@@ -31,6 +31,13 @@ bool add_room(RoomArray* ra, const char* code,
         return false;
     }
 
+    /* Validasi panjang kode ruangan */
+    if (strlen(code) >= STR_LEN_SHORT) {
+        printf("[Error] Kode ruangan terlalu panjang! Maksimal %d karakter.\n",
+               STR_LEN_SHORT - 1);
+        return false;
+    }
+
     /* Cek kode ruangan duplikat */
     for (int i = 0; i < ra->count; i++) {
         if (strcasecmp(ra->rooms[i].code, code) == 0) {
@@ -42,8 +49,8 @@ bool add_room(RoomArray* ra, const char* code,
     /* Ambil slot Array berikutnya */
     Room* r = &ra->rooms[ra->count];
 
-    strncpy(r->code, code, STR_LEN_SHORT - 1);
-    r->code[STR_LEN_SHORT - 1] = '\0';
+    /* Simpan kode yang sudah divalidasi */
+    strcpy(r->code, code);
 
     strncpy(r->building, building, STR_LEN_MID - 1);
     r->building[STR_LEN_MID - 1] = '\0';
@@ -60,90 +67,6 @@ bool add_room(RoomArray* ra, const char* code,
     ra->count++;
 
     printf("[Sukses] Ruangan %s berhasil ditambahkan!\n", code);
-
-    return true;
-}
-
-/* Ubah data ruangan */
-bool update_room(RoomArray* ra, const char* code,
-                 const char* building, int floor,
-                 int capacity, const char* facilities) {
-
-    if (ra == NULL || code == NULL || building == NULL ||
-        facilities == NULL) {
-        return false;
-    }
-
-    if (strlen(building) == 0 || strlen(facilities) == 0 ||
-        floor < 0 || capacity <= 0) {
-        printf("[Error] Data perubahan tidak valid!\n");
-        return false;
-    }
-
-    for (int i = 0; i < ra->count; i++) {
-
-        if (strcasecmp(ra->rooms[i].code, code) == 0) {
-
-            strncpy(ra->rooms[i].building, building,
-                    STR_LEN_MID - 1);
-            ra->rooms[i].building[STR_LEN_MID - 1] = '\0';
-
-            ra->rooms[i].floor = floor;
-            ra->rooms[i].capacity = capacity;
-
-            strncpy(ra->rooms[i].facilities, facilities,
-                    STR_LEN_LONG - 1);
-            ra->rooms[i].facilities[STR_LEN_LONG - 1] = '\0';
-
-            printf("[Sukses] Data ruangan %s berhasil diperbarui!\n", code);
-
-            return true;
-        }
-    }
-
-    printf("[Error] Ruangan %s tidak ditemukan!\n", code);
-    return false;
-}
-
-/* Hapus ruangan */
-bool delete_room(RoomArray* ra, const char* code) {
-
-    if (ra == NULL || code == NULL) {
-        return false;
-    }
-
-    int target_idx = -1;
-
-    /* Cari indeks ruangan */
-    for (int i = 0; i < ra->count; i++) {
-
-        if (strcasecmp(ra->rooms[i].code, code) == 0) {
-            target_idx = i;
-            break;
-        }
-    }
-
-    if (target_idx == -1) {
-        printf("[Error] Ruangan %s tidak ditemukan!\n", code);
-        return false;
-    }
-
-    /* Bebaskan Linked List jadwal milik ruangan */
-    free_schedules(ra->rooms[target_idx].schedule_head);
-
-    ra->rooms[target_idx].schedule_head = NULL;
-
-    /* Geser elemen Array */
-    for (int i = target_idx; i < ra->count - 1; i++) {
-        ra->rooms[i] = ra->rooms[i + 1];
-    }
-
-    ra->count--;
-
-    /* Bersihkan slot terakhir yang tidak lagi digunakan */
-    memset(&ra->rooms[ra->count], 0, sizeof(Room));
-
-    printf("[Sukses] Ruangan %s berhasil dihapus!\n", code);
 
     return true;
 }
